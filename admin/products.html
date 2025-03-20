@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management | Admin Panel</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-panel">
+    <header class="admin-header">
+        <div class="container">
+            <div class="logo">
+                <h1>Mini Shop Admin</h1>
+            </div>
+            <nav class="admin-nav">
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="products.html" class="active">Products</a></li>
+                    <li><a href="orders.html">Orders</a></li>
+                </ul>
+            </nav>
+            <div class="admin-logout">
+                <button id="logout-btn" class="btn btn-small">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="container">
+            <div class="page-header">
+                <h2>Product Management</h2>
+                <button id="add-product-btn" class="btn btn-primary">Add New Product</button>
+            </div>
+            
+            <div class="product-filters">
+                <select id="category-filter">
+                    <option value="all">All Categories</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="clothing">Clothing</option>
+                    <option value="home">Home & Kitchen</option>
+                    <option value="beauty">Beauty & Personal Care</option>
+                </select>
+                <input type="text" id="search-product" placeholder="Search products...">
+            </div>
+
+            <div class="table-container">
+                <table class="admin-table" id="products-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Image</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-list">
+                        <!-- Products will be loaded dynamically here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add/Edit Product Modal -->
+            <div id="product-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h3 id="modal-title">Add New Product</h3>
+                    <form id="product-form">
+                        <input type="hidden" id="product-id">
+                        <div class="form-group">
+                            <label for="product-name">Product Name</label>
+                            <input type="text" id="product-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-category">Category</label>
+                            <select id="product-category" required>
+                                <option value="">Select category</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="clothing">Clothing</option>
+                                <option value="home">Home & Kitchen</option>
+                                <option value="beauty">Beauty & Personal Care</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-price">Price ($)</label>
+                            <input type="number" id="product-price" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-stock">Stock Quantity</label>
+                            <input type="number" id="product-stock" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-description">Description</label>
+                            <textarea id="product-description" rows="4" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-image">Image URL</label>
+                            <input type="text" id="product-image" required>
+                            <div class="image-preview">
+                                <img id="image-preview" src="" alt="No image" style="display: none; max-width: 100%; max-height: 200px; margin-top: 10px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-status">Status</label>
+                            <select id="product-status" required>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="sale">On Sale</option>
+                            </select>
+                        </div>
+                        <div class="sale-options" style="display: none;">
+                            <div class="form-group">
+                                <label for="sale-price">Sale Price ($)</label>
+                                <input type="number" id="sale-price" step="0.01" min="0">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="cancel-product">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Product</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Delete Confirmation Modal -->
+            <div id="delete-modal" class="modal">
+                <div class="modal-content delete-confirmation">
+                    <h3>Delete Product</h3>
+                    <p>Are you sure you want to delete this product? This action cannot be undone.</p>
+                    <div class="modal-actions">
+                        <button id="cancel-delete" class="btn btn-secondary">Cancel</button>
+                        <button id="confirm-delete" class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="admin-footer">
+        <div class="container">
+            <p>&copy; 2025 Mini Shop Admin Panel. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/admin.js"></script>
+    <script>
+        // Check if user is logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!localStorage.getItem('adminLoggedIn')) {
+                window.location.href = '../login.html';
+            }
+            
+            // Toggle sale price field visibility based on status selection
+            document.getElementById('product-status').addEventListener('change', function() {
+                const saleOptions = document.querySelector('.sale-options');
+                if (this.value === 'sale') {
+                    saleOptions.style.display = 'block';
+                } else {
+                    saleOptions.style.display = 'none';
+                }
+            });
+            
+            // Preview image when URL is entered
+            document.getElementById('product-image').addEventListener('input', function() {
+                const preview = document.getElementById('image-preview');
+                if (this.value) {
+                    preview.src = this.value;
+                    preview.style.display = 'block';
+                    preview.onerror = function() {
+                        preview.src = '../images/placeholder.png';
+                        preview.alt = 'Invalid image URL';
+                    };
+                } else {
+                    preview.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

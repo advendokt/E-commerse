@@ -1,6 +1,3 @@
-// Admin Panel JavaScript
-
-// Check if user is logged in on any admin page
 function checkAdminAuth() {
     if (!localStorage.getItem('adminLoggedIn') && !window.location.href.includes('login.html')) {
         window.location.href = '../login.html';
@@ -413,3 +410,69 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('adminCredentials', JSON.stringify(adminCredentials));
     }
 });
+
+function initializeProductsPage() {
+    if (document.getElementById('products-list')) {
+        loadProducts();
+        setupProductModal();
+    }
+}
+
+// Open Product Modal for Editing
+function openProductModal(productId) {
+    const modal = document.getElementById('product-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const saveButton = document.getElementById('save-product-btn');
+
+    // Get the product from localStorage
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+    const product = products.find(p => p.id === productId);
+
+    if (product) {
+        // Populate modal fields
+        document.getElementById('product-id').value = product.id;
+        document.getElementById('product-name').value = product.name;
+        document.getElementById('product-price').value = product.price;
+        document.getElementById('product-category').value = product.category;
+        document.getElementById('product-stock').value = product.stock;
+        document.getElementById('product-image').value = product.image;
+
+        // Update modal title
+        modalTitle.textContent = "Edit Product";
+
+        // Show modal
+        modal.style.display = "block";
+
+        // Set save button event listener
+        saveButton.onclick = function() {
+            saveProductChanges(productId);
+        };
+    }
+}
+
+// Save edited product details
+function saveProductChanges(productId) {
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+    const productIndex = products.findIndex(p => p.id === productId);
+
+    if (productIndex !== -1) {
+        // Update product details
+        products[productIndex].name = document.getElementById('product-name').value;
+        products[productIndex].price = parseFloat(document.getElementById('product-price').value);
+        products[productIndex].category = document.getElementById('product-category').value;
+        products[productIndex].stock = parseInt(document.getElementById('product-stock').value);
+        products[productIndex].image = document.getElementById('product-image').value;
+
+        // Save back to localStorage
+        localStorage.setItem('products', JSON.stringify(products));
+
+        // Close modal
+        document.getElementById('product-modal').style.display = "none";
+
+        // Reload products
+        loadProducts();
+
+        // Show success message
+        alert('Product updated successfully!');
+    }
+}
